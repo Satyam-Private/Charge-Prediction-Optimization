@@ -1,0 +1,207 @@
+{% extends "postlogin.html" %}
+
+{% block content %}
+<section class="prediction-section">
+    <div class="form-panel">
+        <div class="form-header">
+            <div class="form-header-left">
+                <h2>{{ action }} Vehicle</h2>
+                <p>Fill in your vehicle details below</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            <div class="form-body">
+
+                <div class="form-group full">
+                    <label>Name (optional)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-tag"></i>
+                        <input type="text" name="name" placeholder="e.g. My Tesla" value="{{ vehicle.name if vehicle else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Model</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-car"></i>
+                        <input type="text" name="model" placeholder="e.g. Model 3" required value="{{ vehicle.model if vehicle else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Battery Capacity (kWh)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-battery-full"></i>
+                        <input type="number" step="0.01" name="battery_capacity" placeholder="e.g. 75" required value="{{ vehicle.battery_capacity if vehicle else '' }}">
+                    </div>
+                </div>
+
+                <!-- Port Type — full width with badge -->
+                <div class="form-group full">
+                    <label>Charging Port Type</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-plug"></i>
+                        <select name="charging_port_type" id="port_select" required>
+                            <option value="">— Select port type —</option>
+
+                            <optgroup label="AC Slow Charging">
+                                <option value="Type1"
+                                    data-charge="AC_Slow"
+                                    data-speed="slow"
+                                    {% if vehicle and vehicle.charging_port_type=='Type1' %}selected{% endif %}>
+                                    Type 1 (J1772) — Up to 7.4 kW · AC Slow
+                                </option>
+                                <option value="Type2"
+                                    data-charge="AC_Slow"
+                                    data-speed="slow"
+                                    {% if vehicle and vehicle.charging_port_type=='Type2' %}selected{% endif %}>
+                                    Type 2 (Mennekes) — Up to 22 kW · AC Slow
+                                </option>
+                                <option value="3Pin"
+                                    data-charge="AC_Slow"
+                                    data-speed="slow"
+                                    {% if vehicle and vehicle.charging_port_type=='3Pin' %}selected{% endif %}>
+                                    3-Pin Domestic — Up to 2.3 kW · AC Slow
+                                </option>
+                            </optgroup>
+
+                            <optgroup label="DC Fast Charging">
+                                <option value="CCS1"
+                                    data-charge="DC_Fast"
+                                    data-speed="fast"
+                                    {% if vehicle and vehicle.charging_port_type=='CCS1' %}selected{% endif %}>
+                                    CCS1 (Combo 1) — Up to 350 kW · DC Fast
+                                </option>
+                                <option value="CCS2"
+                                    data-charge="DC_Fast"
+                                    data-speed="fast"
+                                    {% if vehicle and vehicle.charging_port_type=='CCS2' %}selected{% endif %}>
+                                    CCS2 (Combo 2) — Up to 350 kW · DC Fast
+                                </option>
+                                <option value="CHAdeMO"
+                                    data-charge="DC_Fast"
+                                    data-speed="fast"
+                                    {% if vehicle and vehicle.charging_port_type=='CHAdeMO' %}selected{% endif %}>
+                                    CHAdeMO — Up to 100 kW · DC Fast
+                                </option>
+                                <option value="GB_T"
+                                    data-charge="DC_Fast"
+                                    data-speed="fast"
+                                    {% if vehicle and vehicle.charging_port_type=='GB_T' %}selected{% endif %}>
+                                    GB/T — Up to 250 kW · DC Fast (China)
+                                </option>
+                            </optgroup>
+
+                            <optgroup label="Dual-Mode (AC &amp; DC)">
+                                <option value="NACS"
+                                    data-charge="DC_Fast"
+                                    data-speed="fast"
+                                    {% if vehicle and vehicle.charging_port_type=='NACS' %}selected{% endif %}>
+                                    NACS (Tesla) — Up to 250 kW · AC &amp; DC
+                                </option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Auto-detected charging type — read-only display -->
+                <div class="form-group full" id="charge_type_row" style="display:none;">
+                    <label>Detected Charging Type</label>
+                    <div id="charge_type_badge" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 12px 18px;
+                        border-radius: 8px;
+                        font-size: 0.88rem;
+                        font-weight: 500;
+                        border: 1px solid;
+                        transition: all 0.3s;">
+                        <i id="charge_type_icon" class="fas fa-bolt"></i>
+                        <span id="charge_type_text">—</span>
+                    </div>
+                    <!-- Hidden input so it's submitted with the form -->
+                    <input type="hidden" name="charging_type" id="charging_type_hidden">
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <div class="form-note">
+                    <i class="fas fa-circle-info"></i>
+                    Charging type is auto-detected from your port selection.
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a href="{{ url_for('vehicles') }}" class="btn-home" style="
+                        display:inline-flex; align-items:center; gap:8px;
+                        font-size:0.85rem; font-weight:500; letter-spacing:0.08em;
+                        text-transform:uppercase; text-decoration:none;
+                        color:var(--accent); padding:12px 24px; border-radius:8px;
+                        border:1px solid rgba(0,212,255,0.3); transition:all 0.25s;">
+                        <i class="fas fa-xmark"></i> Cancel
+                    </a>
+                    <button class="btn-submit" type="submit">
+                        <i class="fas fa-floppy-disk"></i> {{ action }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const portSelect     = document.getElementById('port_select');
+    const chargeRow      = document.getElementById('charge_type_row');
+    const chargeBadge    = document.getElementById('charge_type_badge');
+    const chargeIcon     = document.getElementById('charge_type_icon');
+    const chargeText     = document.getElementById('charge_type_text');
+    const chargeHidden   = document.getElementById('charging_type_hidden');
+
+    // Map data-charge value → display config
+    const config = {
+        AC_Slow: {
+            label:  'AC Slow Charging — Standard home / public',
+            icon:   'fas fa-plug',
+            color:  'var(--accent2)',
+            bg:     'rgba(0,255,136,0.07)',
+            border: 'rgba(0,255,136,0.25)',
+        },
+        DC_Fast: {
+            label:  'DC Fast Charging — Rapid highway charging',
+            icon:   'fas fa-bolt',
+            color:  'var(--accent)',
+            bg:     'rgba(0,212,255,0.07)',
+            border: 'rgba(0,212,255,0.25)',
+        },
+    };
+
+    function updateChargeType() {
+        const opt        = portSelect.options[portSelect.selectedIndex];
+        const chargeVal  = opt ? opt.getAttribute('data-charge') : null;
+
+        if (!chargeVal || !portSelect.value) {
+            chargeRow.style.display = 'none';
+            chargeHidden.value = '';
+            return;
+        }
+
+        const cfg = config[chargeVal];
+        chargeRow.style.display        = 'block';
+        chargeHidden.value             = chargeVal;
+        chargeText.textContent         = cfg.label;
+        chargeIcon.className           = cfg.icon;
+        chargeIcon.style.color         = cfg.color;
+        chargeBadge.style.color        = cfg.color;
+        chargeBadge.style.background   = cfg.bg;
+        chargeBadge.style.borderColor  = cfg.border;
+    }
+
+    portSelect.addEventListener('change', updateChargeType);
+
+    // Initialize on page load (handles edit mode where a port is pre-selected)
+    updateChargeType();
+});
+</script>
+{% endblock %}

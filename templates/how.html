@@ -1,0 +1,273 @@
+{% extends "postlogin.html" %}
+
+{% block content %}
+    <hr class="divider">
+
+    <section id="how-section" class="how-section">
+        <div class="section-eyebrow">Process</div>
+        <div class="section-heading">How It Works</div>
+
+        <!-- horizontal tiles -->
+        <div class="h-steps">
+
+            <div class="h-step">
+                <div class="h-step-num">01</div>
+                <div class="h-step-icon"><i class="fas fa-user-plus"></i></div>
+                <h4>Create Account</h4>
+                <p>Sign up for free in under a minute — no credit card required. Get instant access to the prediction engine, your personal vehicle garage, and charging history dashboard.</p>
+                <ul class="step-list">
+                    <li><i class="fas fa-check-circle"></i> Secure email & password registration</li>
+                    <li><i class="fas fa-check-circle"></i> Persistent session across devices</li>
+                    <li><i class="fas fa-check-circle"></i> Save multiple vehicles to your profile</li>
+                </ul>
+            </div>
+
+            <div class="h-step-arrow"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="h-step">
+                <div class="h-step-num">02</div>
+                <div class="h-step-icon"><i class="fas fa-sliders"></i></div>
+                <h4>Enter Details</h4>
+                <p>Select a saved vehicle or enter custom parameters. Provide battery capacity, current charge level, charger power, and ambient temperature — all factors that directly affect charge time.</p>
+                <ul class="step-list">
+                    <li><i class="fas fa-check-circle"></i> Auto-fill capacity from saved vehicles</li>
+                    <li><i class="fas fa-check-circle"></i> Charging type auto-detected from port</li>
+                    <li><i class="fas fa-check-circle"></i> Supports AC Slow & DC Fast modes</li>
+                </ul>
+            </div>
+
+            <div class="h-step-arrow"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="h-step">
+                <div class="h-step-num">03</div>
+                <div class="h-step-icon"><i class="fas fa-microchip"></i></div>
+                <h4>Get Prediction</h4>
+                <p>Our ML model processes your inputs and instantly returns a precise estimate. It accounts for battery degradation, temperature impact on charge acceptance, and charger efficiency curves.</p>
+                <ul class="step-list">
+                    <li><i class="fas fa-check-circle"></i> Sub-second ML inference engine</li>
+                    <li><i class="fas fa-check-circle"></i> Temperature-aware accuracy adjustments</li>
+                    <li><i class="fas fa-check-circle"></i> Result in minutes or hours</li>
+                </ul>
+            </div>
+
+            <div class="h-step-arrow"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="h-step">
+                <div class="h-step-num">04</div>
+                <div class="h-step-icon"><i class="fas fa-bolt"></i></div>
+                <h4>Optimize</h4>
+                <p>Get personalized suggestions — ideal charging windows, temperature preconditions, and power settings — to minimize charge time and protect your battery's long-term health.</p>
+                <ul class="step-list">
+                    <li><i class="fas fa-check-circle"></i> Session-specific optimization tips</li>
+                    <li><i class="fas fa-check-circle"></i> Battery longevity recommendations</li>
+                    <li><i class="fas fa-check-circle"></i> Real-world efficiency best practices</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <style>
+        /* ── Horizontal steps layout ── */
+        .h-steps {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+        }
+
+        .h-step {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 36px 28px 32px;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .h-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 24px rgba(0,212,255,0.15);
+            border-color: rgba(0,212,255,0.3);
+        }
+
+        /* top glow line per step */
+        .h-step::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            border-radius: 14px 14px 0 0;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .h-step:hover::before { opacity: 1; }
+
+        /* alternate accent colors per step */
+        .h-step:nth-child(1)::before { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .h-step:nth-child(3)::before { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
+        .h-step:nth-child(5)::before { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .h-step:nth-child(7)::before { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
+
+        .h-step-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem; font-weight: 900;
+            color: rgba(0,212,255,0.1);
+            line-height: 1; margin-bottom: 14px;
+        }
+
+        .h-step-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            background: rgba(0,212,255,0.08);
+            border: 1px solid rgba(0,212,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: var(--accent);
+            margin-bottom: 18px;
+        }
+
+        .h-step:nth-child(3) .h-step-icon,
+        .h-step:nth-child(7) .h-step-icon {
+            background: rgba(0,255,136,0.08);
+            border-color: rgba(0,255,136,0.2);
+            color: var(--accent2);
+        }
+
+        .h-step h4 {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.82rem; font-weight: 700;
+            color: #fff; letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .h-step p {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        /* ── RESPONSIVE TABLETS: 900px ── */
+        @media (max-width: 900px) {
+            .h-steps { flex-direction: column; gap: 0; }
+            .h-step { width: 100%; border-radius: 0; border-bottom: none; padding: 36px 24px; }
+            .h-step:first-child { border-radius: 14px 14px 0 0; }
+            .h-step:last-child { border-radius: 0 0 14px 14px; border-bottom: 1px solid var(--border); }
+            .h-step-arrow { margin: 0 auto; padding: 8px 0; transform: rotate(90deg); }
+            .h-step-num { font-size: 2.2rem; }
+            .h-step-title { font-size: 0.9rem; }
+            .step-list li { font-size: 0.78rem; }
+        }
+
+        /* ── RESPONSIVE MOBILE: 768px ── */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 24px; height: 64px; }
+            .logo { font-size: 0.85rem; gap: 8px; }
+            .nav-links-plain { gap: 2px; margin-right: 12px; }
+            .nav-links-plain a { font-size: 0.75rem; padding: 5px 10px; }
+            .btn-login, .btn-register { font-size: 0.75rem; padding: 8px 16px; }
+            
+            .hero-section { padding: 80px 24px; }
+            .hero-section h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 16px; }
+            .hero-section p { font-size: 0.95rem; }
+            
+            .what-section, .when-section, .process-section { padding: 70px 24px; }
+            .section-title { font-size: clamp(1.3rem, 2.5vw, 2rem); margin-bottom: 40px; }
+            .feature-grid { gap: 14px; }
+            .fcard { padding: 28px 20px; }
+            .fcard h3 { font-size: 0.8rem; }
+            .fcard p { font-size: 0.85rem; }
+            
+            .h-step { padding: 32px 24px; }
+            .h-step-num { font-size: 2.1rem; }
+            .h-step-title { font-size: 0.88rem; }
+            .step-list li { font-size: 0.75rem; }
+        }
+
+        /* ── RESPONSIVE MOBILE: 680px ── */
+        @media (max-width: 680px) {
+            .navbar { padding: 0 16px; height: 60px; }
+            .logo { font-size: 0.8rem; }
+            .nav-links-plain { display: none; }
+            .btn-login, .btn-register { font-size: 0.7rem; padding: 7px 14px; }
+            
+            .hero-section { padding: 60px 16px; }
+            .hero-section h1 { font-size: clamp(1.4rem, 3.5vw, 2rem); line-height: 1.1; margin-bottom: 14px; }
+            .hero-section p { font-size: 0.9rem; line-height: 1.6; }
+            .hero-cta { gap: 10px; flex-direction: column; }
+            .cta-link { width: 100%; justify-content: center; font-size: 0.77rem; padding: 10px 22px; }
+            
+            .what-section, .when-section, .process-section { padding: 50px 16px; }
+            .section-title { font-size: clamp(1.1rem, 3.5vw, 1.6rem); margin-bottom: 32px; }
+            .feature-grid { gap: 12px; }
+            .fcard { padding: 22px 16px; }
+            .fcard-icon { width: 40px; height: 40px; font-size: 1rem; margin-bottom: 14px; }
+            .fcard h3 { font-size: 0.75rem; }
+            .fcard p { font-size: 0.8rem; line-height: 1.5; }
+            
+            .h-step { padding: 24px 16px; }
+            .h-step-icon { font-size: 3rem; }
+            .h-step-num { font-size: 1.8rem; }
+            .h-step-title { font-size: 0.8rem; }
+            .step-list { margin-top: 14px; gap: 8px; }
+            .step-list li { font-size: 0.73rem; }
+        }
+
+        /* ── RESPONSIVE SMALL MOBILE: 480px ── */
+        @media (max-width: 480px) {
+            .navbar { padding: 0 12px; height: 56px; }
+            .logo { font-size: 0.75rem; gap: 6px; }
+            .logo-dot { width: 6px; height: 6px; }
+            .btn-login, .btn-register { font-size: 0.65rem; padding: 6px 10px; }
+            
+            .hero-section { padding: 50px 14px; }
+            .hero-section h1 { font-size: clamp(1.2rem, 3vw, 1.8rem); margin-bottom: 12px; }
+            .hero-section p { font-size: 0.85rem; }
+            .cta-link { font-size: 0.73rem; padding: 9px 18px; }
+            
+            .what-section, .when-section, .process-section { padding: 40px 14px; }
+            .section-title { font-size: clamp(1rem, 3.2vw, 1.4rem); margin-bottom: 26px; }
+            .feature-grid { gap: 10px; }
+            .fcard { padding: 18px 14px; }
+            .fcard-icon { width: 36px; height: 36px; font-size: 0.9rem; }
+            .fcard h3 { font-size: 0.72rem; }
+            .fcard p { font-size: 0.78rem; }
+            
+            .h-step { padding: 20px 14px; }
+            .h-step-icon { font-size: 2.6rem; }
+            .h-step-num { font-size: 1.6rem; }
+            .h-step-title { font-size: 0.77rem; }
+            .step-list { margin-top: 12px; gap: 7px; }
+            .step-list li { font-size: 0.7rem; }
+        }
+
+        /* ── RESPONSIVE EXTRA SMALL: 375px ── */
+        @media (max-width: 375px) {
+            .navbar { padding: 0 10px; height: 54px; }
+            .logo { font-size: 0.7rem; }
+            .btn-login, .btn-register { font-size: 0.62rem; padding: 5px 8px; }
+            
+            .hero-section { padding: 45px 12px; }
+            .hero-section h1 { font-size: clamp(1rem, 2.8vw, 1.6rem); margin-bottom: 10px; }
+            .hero-section p { font-size: 0.8rem; }
+            .cta-link { font-size: 0.7rem; padding: 8px 14px; }
+            
+            .what-section, .when-section, .process-section { padding: 35px 12px; }
+            .section-title { font-size: clamp(0.95rem, 2.8vw, 1.2rem); margin-bottom: 22px; }
+            .feature-grid { gap: 8px; }
+            .fcard { padding: 16px 12px; }
+            .fcard-icon { width: 32px; height: 32px; font-size: 0.85rem; }
+            .fcard h3 { font-size: 0.7rem; }
+            .fcard p { font-size: 0.75rem; }
+            
+            .h-step { padding: 18px 12px; }
+            .h-step-icon { font-size: 2.2rem; }
+            .h-step-num { font-size: 1.4rem; }
+            .h-step-title { font-size: 0.73rem; }
+            .step-list { margin-top: 10px; }
+            .step-list li { font-size: 0.68rem; }
+        }
+    </style>
+{% endblock %}

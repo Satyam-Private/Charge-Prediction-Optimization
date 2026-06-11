@@ -3,43 +3,714 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charging Time Prediction Results</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Prediction Results – SmartCharge Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050c12;
+            --panel: #0b1d2e;
+            --border: #0f4060;
+            --accent: #00d4ff;
+            --accent2: #00ff88;
+            --accent3: #7b4fff;
+            --text: #c8e8f5;
+            --muted: #4a7a99;
+            --glow: 0 0 24px rgba(0,212,255,0.3);
+            --glow2: 0 0 24px rgba(0,255,136,0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none; z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 600px 500px at 10% 20%, rgba(0,212,255,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 400px at 90% 80%, rgba(0,255,136,0.06) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 52px; height: 68px;
+            background: rgba(5,12,18,0.88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,212,255,0.1);
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem; font-weight: 700;
+            color: var(--accent); letter-spacing: 0.06em;
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent2); box-shadow: 0 0 10px var(--accent2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.4; transform:scale(0.75); }
+        }
+
+        .nav-links {
+            list-style: none; display: flex; gap: 4px;
+        }
+
+        .nav-links a {
+            font-size: 0.8rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); text-decoration: none;
+            padding: 6px 14px; border-radius: 4px; transition: all 0.2s;
+        }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* ── HAMBURGER BUTTON ── */
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            z-index: 200;
+        }
+
+        .hamburger-btn span {
+            width: 24px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: all 0.35s ease;
+        }
+
+        .hamburger-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .hamburger-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* ── MOBILE MENU OVERLAY ── */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ── MOBILE MENU TOAST ── */
+        .mobile-menu-toast {
+            position: fixed;
+            right: -100%;
+            top: 0;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            padding: 100px 0 40px 0;
+            overflow-y: auto;
+            z-index: 160;
+            transition: right 0.35s ease;
+        }
+
+        .mobile-menu-toast.active {
+            right: 0;
+        }
+
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+            color: var(--accent);
+            padding-left: 24px;
+        }
+
+        .mobile-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* ── PAGE WRAPPER ── */
+        .page {
+            position: relative; z-index: 1;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 100px 24px 60px;
+        }
+
+        /* ── RESULT CARD ── */
+        .result-card {
+            width: 100%; max-width: 720px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px; overflow: hidden;
+            animation: fadeUp 0.6s ease both;
+            position: relative;
+        }
+
+        /* top accent line */
+        .result-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── CARD HEADER ── */
+        .card-header {
+            padding: 36px 40px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+
+        .card-header-left h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem; font-weight: 800; color: #fff;
+            letter-spacing: 0.02em;
+        }
+
+        .card-header-left p {
+            font-size: 0.82rem; color: var(--muted); margin-top: 5px;
+        }
+
+        .result-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--accent2);
+            background: rgba(0,255,136,0.07);
+            border: 1px solid rgba(0,255,136,0.2);
+            padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+        }
+
+        .result-badge::before {
+            content: '';
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent2); box-shadow: 0 0 8px var(--accent2);
+            animation: pulse 2s infinite;
+        }
+
+        /* ── PREDICTION DISPLAY ── */
+        .prediction-block {
+            padding: 44px 40px;
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,212,255,0.02);
+        }
+
+        .prediction-label {
+            font-size: 0.72rem; font-weight: 500;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 16px;
+        }
+
+        .prediction-value {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3.5rem, 10vw, 6rem);
+            font-weight: 900; line-height: 1;
+            background: linear-gradient(135deg, #fff 20%, var(--accent) 60%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(0,212,255,0.4));
+        }
+
+        .prediction-unit {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem; font-weight: 600;
+            color: var(--muted); margin-top: 10px;
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+
+        /* circular ring around value */
+        .prediction-ring {
+            position: relative;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            width: 220px; height: 220px;
+            margin: 0 auto 8px;
+        }
+
+        .prediction-ring svg {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring-track {
+            fill: none; stroke: var(--border); stroke-width: 3;
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke: url(#ringGrad);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 628;
+            stroke-dashoffset: 157; /* 75% filled */
+            transition: stroke-dashoffset 1.2s ease;
+        }
+
+        /* ── SUGGESTIONS ── */
+        .suggestions-block {
+            padding: 32px 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .suggestions-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.82rem; font-weight: 700;
+            color: #fff; letter-spacing: 0.06em;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .suggestions-title i {
+            color: var(--accent2);
+            font-size: 0.9rem;
+        }
+
+        .suggestion-list {
+            list-style: none; display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .suggestion-list li {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-size: 0.9rem; color: var(--text); line-height: 1.55;
+            background: rgba(0,255,136,0.04);
+            border: 1px solid rgba(0,255,136,0.1);
+            border-radius: 8px; padding: 14px 16px;
+            transition: all 0.2s;
+        }
+
+        .suggestion-list li:hover {
+            background: rgba(0,255,136,0.07);
+            border-color: rgba(0,255,136,0.2);
+        }
+
+        .suggestion-list li .check {
+            flex-shrink: 0;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(0,255,136,0.15);
+            border: 1px solid rgba(0,255,136,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 1px;
+        }
+
+        .suggestion-list li .check i {
+            font-size: 0.65rem; color: var(--accent2);
+        }
+
+        /* ── CARD FOOTER ── */
+        .card-footer {
+            padding: 24px 40px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .footer-note {
+            font-size: 0.78rem; color: var(--muted);
+            display: flex; align-items: center; gap: 7px;
+        }
+
+        .btn-again {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            text-decoration: none; color: #050c12;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            padding: 12px 28px; border-radius: 8px; border: none;
+            cursor: pointer;
+            box-shadow: 0 0 24px rgba(0,212,255,0.35);
+            transition: all 0.25s;
+        }
+
+        .btn-again:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0,212,255,0.55);
+        }
+
+        .btn-home {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            text-decoration: none; color: var(--accent);
+            background: transparent; padding: 12px 24px; border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.3); transition: all 0.25s;
+        }
+
+        .btn-home:hover {
+            background: rgba(0,212,255,0.07); border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative; z-index: 1;
+            border-top: 1px solid var(--border);
+            text-align: center; padding: 26px;
+            font-size: 0.76rem; color: var(--muted); letter-spacing: 0.05em;
+            margin-top: 40px;
+        }
+
+        footer span { color: var(--accent2); }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 24px; height: 64px; }
+            .logo { font-size: 0.85rem; gap: 8px; }
+            .nav-links { gap: 2px; }
+            .nav-links a { font-size: 0.72rem; padding: 5px 10px; }
+            
+            .page { padding: 90px 20px 50px; }
+            .result-card { max-width: 100%; }
+            .card-header { padding: 28px 24px 20px; flex-direction: column; align-items: flex-start; }
+            .card-header-left h1 { font-size: 1rem; }
+            .result-badge { font-size: 0.64rem; }
+            
+            .prediction-block { padding: 36px 24px; }
+            .prediction-label { font-size: 0.68rem; }
+            .prediction-value { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+            .prediction-ring { width: 180px; height: 180px; }
+            
+            .suggestions-block { padding: 24px; }
+            .suggestions-title { font-size: 0.78rem; }
+            .suggestion-list li { font-size: 0.85rem; padding: 12px 14px; }
+            
+            .card-footer { padding: 20px 24px; flex-direction: column; }
+            .btn-again, .btn-home { width: 100%; justify-content: center; font-size: 0.8rem; }
+        }
+
+        @media (max-width: 680px) {
+            .navbar { padding: 0 16px; height: 60px; }
+            .logo { font-size: 0.8rem; }
+            .nav-links { display: none; }
+            .hamburger-btn { display: flex; }
+            
+            .page { padding: 70px 14px 40px; }
+            .result-card { border-radius: 16px; }
+            .card-header { padding: 20px 16px 14px; }
+            .card-header-left h1 { font-size: 0.95rem; }
+            .card-header-left p { font-size: 0.75rem; }
+            .result-badge { font-size: 0.6rem; padding: 6px 12px; }
+            
+            .prediction-block { padding: 28px 16px; }
+            .prediction-label { font-size: 0.64rem; margin-bottom: 12px; }
+            .prediction-value { font-size: clamp(2rem, 5vw, 3.5rem); }
+            .prediction-unit { font-size: 0.9rem; margin-top: 8px; }
+            .prediction-ring { width: 150px; height: 150px; margin: 0 auto 6px; }
+            
+            .suggestions-block { padding: 20px 16px; }
+            .suggestions-title { font-size: 0.75rem; margin-bottom: 16px; }
+            .suggestion-list { gap: 10px; }
+            .suggestion-list li { font-size: 0.82rem; padding: 11px 12px; }
+            .suggestion-list li .check { width: 18px; height: 18px; }
+            .suggestion-list li .check i { font-size: 0.6rem; }
+            
+            .card-footer { padding: 16px; gap: 12px; flex-wrap: wrap; }
+            .footer-note { font-size: 0.72rem; }
+            .btn-again, .btn-home { font-size: 0.76rem; padding: 10px 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 0 12px; height: 56px; }
+            .logo { font-size: 0.75rem; }
+            
+            .page { padding: 65px 12px 35px; }
+            .result-card { border-radius: 12px; }
+            .card-header { padding: 18px 14px 12px; }
+            .card-header-left h1 { font-size: 0.9rem; }
+            .result-badge { font-size: 0.57rem; padding: 5px 10px; }
+            
+            .prediction-block { padding: 24px 14px; }
+            .prediction-label { font-size: 0.6rem; }
+            .prediction-value { font-size: clamp(1.8rem, 4.5vw, 3rem); }
+            .prediction-ring { width: 130px; height: 130px; }
+            .prediction-unit { font-size: 0.85rem; }
+            
+            .suggestions-block { padding: 18px 14px; }
+            .suggestions-title { font-size: 0.72rem; margin-bottom: 14px; }
+            .suggestion-list { gap: 8px; }
+            .suggestion-list li { font-size: 0.8rem; padding: 10px 10px; gap: 8px; }
+            
+            .card-footer { padding: 14px; gap: 8px; }
+            .footer-note { font-size: 0.7rem; }
+            .btn-again, .btn-home { font-size: 0.73rem; padding: 9px 16px; }
+        }
+
+        @media (max-width: 375px) {
+            .navbar { padding: 0 10px; height: 54px; }
+            .logo { font-size: 0.7rem; }
+            
+            .page { padding: 60px 10px 30px; }
+            .card-header { padding: 16px 12px 10px; }
+            .card-header-left h1 { font-size: 0.85rem; }
+            .card-header-left p { font-size: 0.72rem; }
+            
+            .prediction-block { padding: 20px 12px; }
+            .prediction-value { font-size: clamp(1.6rem, 4vw, 2.5rem); }
+            .prediction-ring { width: 120px; height: 120px; }
+            
+            .suggestions-block { padding: 16px 12px; }
+            .suggestion-list li { font-size: 0.78rem; padding: 9px 9px; }
+            
+            .card-footer { padding: 12px; }
+            .btn-again, .btn-home { font-size: 0.7rem; padding: 8px 14px; }
+            
+            footer { font-size: 0.7rem; padding: 20px; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="logo">EV Charging</a></div>
+        <a href="{{ url_for('postlogin') }}" class="logo">
+            <div class="logo-dot"></div>
+            SmartCharge Pro
+        </a>
         <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/#charging-section">Prediction</a></li>
-            <li><a href="/#features-section">Features</a></li>
-            <li><a href="/#contact-section">Contact</a></li>
+            <li><a href="{{ url_for('postlogin') }}">Home</a></li>
+            <li><a href="{{ url_for('predict') }}">Prediction</a></li>
+            <li><a href="{{ url_for('how') }}">How It Works</a></li>
+            <li><a href="{{ url_for('postlogin') }}#contact-section">Contact</a></li>
         </ul>
+
+        <!-- HAMBURGER BUTTON -->
+        <button class="hamburger-btn" id="hamburgerBtn">
+            <span></span><span></span><span></span>
+        </button>
     </nav>
 
-    <!-- Results Section -->
-    <section class="result-section">
+    <!-- MOBILE MENU OVERLAY & TOAST -->
+    <div class="mobile-menu-overlay" id="menuOverlay"></div>
+    <div class="mobile-menu-toast" id="mobileMenu">
+        <a href="{{ url_for('postlogin') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="{{ url_for('predict') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-bolt"></i> Prediction
+        </a>
+        <a href="{{ url_for('how') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-book"></i> How It Works
+        </a>
+        <a href="{{ url_for('postlogin') }}#contact-section" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-envelope"></i> Contact
+        </a>
+    </div>
+
+    <!-- RESULT PAGE -->
+    <div class="page">
         <div class="result-card">
-            <h1>Charging Time Prediction Results</h1>
-            <p class="prediction">🔋 Estimated Charging Time: <strong>{{ prediction }}</strong> minutes</p>
 
-            <h2>⚡ Optimization Suggestions:</h2>
-            <ul class="suggestion-list">
-                {% for suggestion in suggestions %}
-                    <li>✔ {{ suggestion }}</li>
-                {% endfor %}
-            </ul>
+            <!-- HEADER -->
+            <div class="card-header">
+                <div class="card-header-left">
+                    <h1>Prediction Results</h1>
+                    <p>Based on your vehicle and session parameters</p>
+                </div>
+                <div class="result-badge">Analysis Complete</div>
+            </div>
 
-            <a href="/#charging-section" class="btn">🔄 Try Again</a>
+            <!-- PREDICTION VALUE -->
+            <div class="prediction-block">
+                <div class="prediction-label">Estimated Charging Time</div>
+
+                <div class="prediction-ring">
+                    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#00d4ff"/>
+                                <stop offset="100%" stop-color="#00ff88"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-track" cx="110" cy="110" r="100"/>
+                        <circle class="ring-fill" cx="110" cy="110" r="100" id="ringArc"/>
+                    </svg>
+
+                    <div class="prediction-value" id="predDisplay">{{ prediction }}</div>
+                    <div class="prediction-unit" id="predUnit">Minutes</div>
+                </div>
+            </div>
+
+            <!-- SUGGESTIONS -->
+            <div class="suggestions-block">
+                <div class="suggestions-title">
+                    <i class="fas fa-bolt"></i>
+                    Optimization Suggestions
+                </div>
+                <ul class="suggestion-list">
+                    {% for suggestion in suggestions %}
+                    <li>
+                        <span class="check"><i class="fas fa-check"></i></span>
+                        {{ suggestion }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- FOOTER ACTIONS -->
+            <div class="card-footer">
+                <span class="footer-note">
+                    <i class="fas fa-circle-info"></i>
+                    Results are ML-estimated and may vary by conditions
+                </span>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <a href="/postlogin" class="btn-home">
+                        <i class="fas fa-house"></i> Home
+                    </a>
+                    <a href="/predict" class="btn-again">
+                        <i class="fas fa-rotate"></i> Try Again
+                    </a>
+                </div>
+            </div>
+
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2025 EV Charging Time. All Rights Reserved.</p>
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 <span>SmartCharge Pro</span> — All Rights Reserved.</p>
     </footer>
+
+    <script>
+        const rawMins = parseFloat("{{ prediction }}") || 0;
+
+        // ── Format display value ──
+        const dispEl  = document.getElementById('predDisplay');
+        const unitEl  = document.getElementById('predUnit');
+
+        if (rawMins >= 60) {
+            const hours   = Math.floor(rawMins / 60);
+            const mins    = Math.round(rawMins % 60);
+            if (mins === 0) {
+                dispEl.textContent = hours;
+                unitEl.textContent = hours === 1 ? 'Hour' : 'Hours';
+            } else {
+                // Show as  H h  MM m  in two lines
+                dispEl.innerHTML =
+                    `${hours}<span style="font-size:0.45em;color:var(--muted);vertical-align:middle;">h</span>`
+                    + `&thinsp;${mins}<span style="font-size:0.45em;color:var(--muted);vertical-align:middle;">m</span>`;
+                unitEl.textContent = 'Hours & Minutes';
+            }
+        } else {
+            dispEl.textContent = Math.round(rawMins);
+            unitEl.textContent = 'Minutes';
+        }
+
+        // ── Animate ring (max scale = 300 mins) ──
+        const maxMins     = 300;
+        const pct         = Math.min(rawMins / maxMins, 1);
+        const circumference = 2 * Math.PI * 100; // ≈628
+        const offset      = circumference - pct * circumference;
+        const arc         = document.getElementById('ringArc');
+        arc.style.strokeDashoffset = circumference;
+        setTimeout(() => { arc.style.strokeDashoffset = offset; }, 100);
+    </script>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        function toggleMobileMenu() {
+            const hamburger = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            hamburger.classList.toggle('active');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const hamburger = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            hamburger.classList.remove('active');
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // Hamburger button click
+        document.getElementById('hamburgerBtn').addEventListener('click', toggleMobileMenu);
+
+        // Overlay click to close
+        document.getElementById('menuOverlay').addEventListener('click', closeMobileMenu);
+
+        // Close menu when window resizes above mobile breakpoint
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 680) {
+                closeMobileMenu();
+            }
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+    </script>
 
 </body>
 </html>

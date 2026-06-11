@@ -1,0 +1,570 @@
+{% extends "postlogin.html" %}
+
+{% block content %}
+<section class="prediction-section">
+    <div class="section-eyebrow">Prediction</div>
+    <div class="section-heading">Estimate Charging Time</div>
+
+    <div class="form-panel">
+        <div class="form-header">
+            <div class="form-header-left">
+                <h2>Input Parameters</h2>
+                <p>Fill in your vehicle and session details below</p>
+            </div>
+            <div class="form-status">Model Online</div>
+        </div>
+
+        <form method="POST" action="/predict">
+            <div class="form-body">
+
+                <!-- Vehicle selector -->
+                <div class="form-group full">
+                    <label>Select Vehicle</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-car"></i>
+                        <select id="vehicle_select" name="vehicle_id">
+                            <option value="">-- Custom / None --</option>
+                            {% for v in vehicles %}
+                            {#
+                                data-charge maps port → charging type:
+                                AC Slow ports : Type1, Type2, Type2_AC, 3Pin
+                                DC Fast ports : CCS1, CCS2, CHAdeMO, GB_T, NACS
+                            #}
+                            <option
+                                value="{{ v.id }}"
+                                data-battery="{{ '%.2f'|format(v.battery_capacity) }}"
+                                data-port="{{ v.charging_port_type }}"
+                                data-model="{{ v.model }}"
+                                data-charge="{{ 'AC_Slow' if v.charging_port_type in ['Type1','Type2','Type2_AC','3Pin'] else 'DC_Fast' }}">
+                                {{ v.name or v.model }} — {{ v.model }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Battery capacity — auto-filled + locked when vehicle selected -->
+                <div class="form-group">
+                    <label>Battery Capacity (kWh)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-battery-full"></i>
+                        <input
+                            type="number"
+                            name="battery_capacity"
+                            id="battery_capacity"
+                            placeholder="e.g. 75"
+                            step="0.01"
+                            required>
+                    </div>
+                    <span id="battery_lock_hint" style="display:none; font-size:0.7rem; color:var(--accent2); margin-top:4px; letter-spacing:0.06em;">
+                        <i class="fas fa-lock" style="font-size:0.65rem;"></i>
+                        Auto-filled from selected vehicle
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Battery Level (%)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-percent"></i>
+                        <input id="current_battery" type="number" name="current_battery" placeholder="e.g. 20" min="0" max="100" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Target Battery Level (%)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-bullseye"></i>
+                        <input id="target_battery" type="number" name="target_battery" placeholder="e.g. 80" min="0" max="100" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Electricity Rate (₹ per kWh)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-coins"></i>
+                        <input id="electricity_rate" type="number" name="electricity_rate" placeholder="e.g. 15" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Charging Power (kW)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-plug"></i>
+                        <input id="charging_power" type="number" name="charging_power" placeholder="e.g. 50" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ambient Temperature (°C)</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-temperature-half"></i>
+                        <input type="number" name="temperature" placeholder="e.g. 25" required>
+                    </div>
+                </div>
+
+                <!-- Charging Type — auto-set from port, still editable manually -->
+                <div class="form-group full">
+                    <label>Charging Type</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-bolt" id="charge_type_icon"></i>
+                        <select name="charging_type" id="charging_type" required>
+                            <option value="AC_Slow">AC Slow — Standard home / public charging</option>
+                            <option value="DC_Fast">DC Fast — Rapid highway charging</option>
+                        </select>
+                    </div>
+                    <!-- badge shown when auto-detected from vehicle -->
+                    <span id="charge_type_hint" style="display:none; font-size:0.7rem; margin-top:6px; letter-spacing:0.06em; display:none; align-items:center; gap:6px;">
+                        <i class="fas fa-circle-check" style="font-size:0.65rem;"></i>
+                        <span id="charge_type_hint_text">Auto-detected from port type</span>
+                    </span>
+                </div>
+
+                <!-- Vehicle info strip — visible only when a vehicle is chosen -->
+                <div class="form-group full" id="vehicle_meta" style="display:none;">
+                    <label>Vehicle Info</label>
+                    <div style="
+                        background: rgba(0,212,255,0.05);
+                        border: 1px solid rgba(0,212,255,0.15);
+                        border-radius: 8px;
+                        padding: 12px 16px;
+                        font-size: 0.88rem;
+                        color: var(--text);
+                        display: flex;
+                        gap: 24px;
+                        flex-wrap: wrap;">
+                        <span><span style="color:var(--muted);">Model:</span> <strong id="meta_model" style="color:var(--accent);">—</strong></span>
+                        <span><span style="color:var(--muted);">Port:</span> <strong id="meta_port" style="color:var(--accent);">—</strong></span>
+                        <span><span style="color:var(--muted);">Capacity:</span> <strong id="meta_battery" style="color:var(--accent2);">—</strong> kWh</span>
+                        <span><span style="color:var(--muted);">Charge Type:</span> <strong id="meta_charge" style="color:var(--accent2);">—</strong></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <span class="form-note">
+                    <i class="fas fa-shield-halved"></i>
+                    Your data is processed locally
+                </span>
+                <div style="display:flex; gap: 10px; align-items:center;">
+                    <button id="resumeSessionBtn" type="button" class="btn-submit" style="background: #ffaa00;" hidden>
+                        <i class="fas fa-history"></i> Resume Last Session
+                    </button>
+                    <button id="themeToggle" type="button" class="btn-submit" style="background: #71717a;">
+                        <i class="fas fa-adjust"></i> Toggle Theme
+                    </button>
+                    <button id="runPredictionBtn" type="submit" class="btn-submit">
+                        <i class="fas fa-bolt"></i> Run Prediction
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</section>
+
+<script>
+function saveSession(data) {
+    if (!data || typeof data !== 'object') return;
+    localStorage.setItem('smartChargeLastSession', JSON.stringify(data));
+}
+
+function loadSession() {
+    const raw = localStorage.getItem('smartChargeLastSession');
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn('Invalid localStorage session data', e);
+        return null;
+    }
+}
+
+function clearSession() {
+    localStorage.removeItem('smartChargeLastSession');
+}
+
+function createSuggestions(inputData, resultData) {
+    const suggestions = [];
+
+    if (!inputData || !resultData) return suggestions;
+
+    const target = Number(inputData.target_battery_level);
+    const current = Number(inputData.current_battery_level);
+    const capacity = Number(inputData.battery_capacity);
+    const station = String(inputData.charging_station_type || '').toUpperCase().replace('-', '_');
+
+    if (target > 80) {
+        suggestions.push('⚠️ Fast charging slows down after 80%. Consider stopping earlier.');
+    }
+    if (station === 'DC_FAST' && current > 70) {
+        suggestions.push('💡 Fast charging at high battery levels is inefficient.');
+    }
+    if (capacity < 30) {
+        suggestions.push('💡 Smaller battery vehicles charge quicker but may need frequent charging.');
+    }
+
+    // Optionally path suggestions from result values
+    if (resultData.estimated_time > 90) {
+        suggestions.push('⚠️ Long sessions may benefit from charging during off-peak hours.');
+    }
+    if (resultData.estimated_cost > 100) {
+        suggestions.push('💡 Explore lower tariff periods to reduce per-charge costs.');
+    }
+
+    return suggestions;
+}
+
+function formatTime(minutes) {
+    const m = Number(minutes);
+    if (isNaN(m) || m < 0) return '-';
+    if (m >= 60) {
+        const h = Math.floor(m / 60);
+        const r = Math.round(m % 60);
+        return `${h}h ${r}m`;
+    }
+    return `${Math.round(m)} min`;
+}
+
+function renderResults(results) {
+    const panel = document.getElementById('calcResults');
+    const timeDisplay = document.getElementById('estimated_time_display');
+    const costDisplay = document.getElementById('estimated_cost_display');
+    const suggestionCards = document.getElementById('suggestionCards');
+
+    if (!panel || !results) return;
+
+    timeDisplay.textContent = formatTime(results.estimated_time);
+    costDisplay.innerHTML = `<span style="color:#ffdb4d;font-weight:700;">₹ ${results.estimated_cost.toFixed(2)}</span>`;
+
+    // suggestions
+    const list = createSuggestions(results.input, results);
+    suggestionCards.innerHTML = '';
+    if (list.length > 0) {
+        list.forEach(text => {
+            const card = document.createElement('div');
+            card.className = 'suggestion-card fade-in';
+            card.textContent = text;
+            suggestionCards.appendChild(card);
+        });
+    } else {
+        suggestionCards.innerHTML = '<div class="suggestion-card" style="background: rgba(0,172,198,0.2);">No special recommendations.</div>';
+    }
+
+    panel.style.display = 'block';
+    panel.style.opacity = '0';
+    setTimeout(() => { panel.style.transition = 'opacity 0.35s ease'; panel.style.opacity = '1'; }, 20);
+}
+
+function applyTheme(theme) {
+    document.body.classList.remove('dark-theme', 'light-theme');
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('smartChargeTheme', 'light');
+    } else {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('smartChargeTheme', 'dark');
+    }
+}
+
+function toggleTheme() {
+    const current = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+    applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+    const stored = localStorage.getItem('smartChargeTheme');
+    if (stored === 'light') {
+        applyTheme('light');
+    } else {
+        applyTheme('dark');
+    }
+}
+
+function updateResumeButtonVisibility() {
+    const resumeBtn = document.getElementById('resumeSessionBtn');
+    const session = loadSession();
+    if (resumeBtn) {
+        resumeBtn.hidden = !session;
+    }
+}
+
+function populateInputs(session) {
+    if (!session) return;
+    const map = {
+        current_battery: 'current_battery',
+        target_battery: 'target_battery',
+        battery_capacity: 'battery_capacity',
+        charging_power: 'charging_power',
+        temperature: 'temperature',
+        charging_type: 'charging_type',
+        electricity_rate: 'electricity_rate'
+    };
+    Object.keys(map).forEach(k => {
+        const el = document.getElementById(map[k]);
+        if (el && session[k] !== undefined) {
+            el.value = session[k];
+        }
+    });
+}
+
+function tryCalculateSession() {
+    const current = Number(document.getElementById('current_battery').value);
+    const target = Number(document.getElementById('target_battery').value);
+    const capacity = Number(document.getElementById('battery_capacity').value);
+    const power = Number(document.getElementById('charging_power').value);
+    const temp = Number(document.querySelector('input[name="temperature"]').value);
+    const station = document.getElementById('charging_type').value;
+    const rate = Number(document.getElementById('electricity_rate').value);
+
+    if (!capacity || !power || rate <= 0 || target <= current) {
+        alert('Please ensure: battery capacity, charging power, valid target/current, and electricity rate > 0.');
+        return null;
+    }
+
+    const energy_needed = ((target - current) / 100) * capacity;
+    const estimated_time = (energy_needed / power) * 60;
+    const estimated_cost = energy_needed * rate;
+
+    return {
+        input: {
+            current_battery_level: current,
+            target_battery_level: target,
+            battery_capacity: capacity,
+            charging_station_type: station,
+        },
+        estimated_time,
+        estimated_cost,
+        energy_needed,
+        charging_power: power,
+        temperature: temp,
+        electricity_rate: rate,
+    };
+}
+
+function buildSessionPayload(result) {
+    return {
+        current_battery_level: Number(result.input.current_battery_level),
+        target_battery_level: Number(result.input.target_battery_level),
+        battery_capacity: Number(result.input.battery_capacity),
+        charging_station_type: result.input.charging_station_type,
+        estimated_time: Number(result.estimated_time),
+        estimated_cost: Number(result.estimated_cost),
+        charging_power: Number(result.charging_power),
+        temperature: Number(result.temperature),
+        electricity_rate: Number(result.electricity_rate)
+    };
+}
+
+function initSessionFromStorage() {
+    const session = loadSession();
+    if (session) {
+        document.getElementById('resumeSessionBtn').hidden = false;
+    }
+}
+
+function init() {
+    initTheme();
+    initSessionFromStorage();
+
+    const form = document.querySelector('form');
+    const resumeBtn = document.getElementById('resumeSessionBtn');
+    const themeBtn = document.getElementById('themeToggle');
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+    }
+
+    if (resumeBtn) {
+        resumeBtn.addEventListener('click', () => {
+            const session = loadSession();
+            if (!session) {
+                alert('No saved session found.');
+                return;
+            }
+            populateInputs(session);
+
+            renderResults({
+                input: {
+                    current_battery_level: session.current_battery_level,
+                    target_battery_level: session.target_battery_level,
+                    battery_capacity: session.battery_capacity,
+                    charging_station_type: session.charging_station_type
+                },
+                estimated_time: session.estimated_time,
+                estimated_cost: session.estimated_cost
+            });
+        });
+    }
+
+    if (form) {
+        // Removed form submission handler to allow normal backend submission
+        // form.addEventListener('submit', function (event) {
+        //     event.preventDefault();
+        //     const result = tryCalculateSession();
+        //     if (!result) return;
+        //     renderResults(result);
+        //     const payload = buildSessionPayload(result);
+        //     saveSession(payload);
+        //     updateResumeButtonVisibility();
+        //     alert('Calculation complete and saved.');
+        // });
+    }
+
+    vehicleSelect.addEventListener('change', onChange);
+    if (vehicleSelect.value) onChange();
+    updateResumeButtonVisibility();
+}
+
+// keep existing vehicle utilities
+const vehicleSelect   = document.getElementById('vehicle_select');
+const batteryInput    = document.getElementById('battery_capacity');
+const lockHint        = document.getElementById('battery_lock_hint');
+const metaBlock       = document.getElementById('vehicle_meta');
+const metaModel       = document.getElementById('meta_model');
+const metaPort        = document.getElementById('meta_port');
+const metaBattery     = document.getElementById('meta_battery');
+const metaCharge      = document.getElementById('meta_charge');
+const chargeSelect    = document.getElementById('charging_type');
+const chargeIcon      = document.getElementById('charge_type_icon');
+const chargeHint      = document.getElementById('charge_type_hint');
+const chargeHintText  = document.getElementById('charge_type_hint_text');
+
+const AC_PORTS = ['Type1', 'Type2', 'Type2_AC', '3Pin'];
+
+function getChargeType(port) {
+    return AC_PORTS.includes(port) ? 'AC_Slow' : 'DC_Fast';
+}
+
+const chargeConfig = {
+    AC_Slow: {
+        label:      'AC Slow',
+        hint:       'Auto-detected: AC Slow (from port type)',
+        iconColor:  'var(--accent2)',
+        hintColor:  'var(--accent2)',
+    },
+    DC_Fast: {
+        label:      'DC Fast',
+        hint:       'Auto-detected: DC Fast (from port type)',
+        iconColor:  'var(--accent)',
+        hintColor:  'var(--accent)',
+    },
+};
+
+function applyChargeType(chargeVal) {
+    const cfg = chargeConfig[chargeVal];
+    if (!cfg) return;
+
+    chargeSelect.value = chargeVal;
+    chargeIcon.style.color = cfg.iconColor;
+    chargeHint.style.display    = 'inline-flex';
+    chargeHintText.textContent  = cfg.hint;
+    chargeHint.style.color      = cfg.hintColor;
+    metaCharge.textContent = cfg.label;
+    metaCharge.style.color = cfg.iconColor;
+}
+
+function resetChargeType() {
+    chargeSelect.value         = 'AC_Slow';
+    chargeIcon.style.color     = '';
+    chargeHint.style.display   = 'none';
+    metaCharge.textContent     = '—';
+}
+
+function applyVehicle(batteryVal, model, port, chargeVal) {
+    batteryInput.value             = batteryVal;
+    batteryInput.readOnly          = true;
+    batteryInput.style.opacity     = '0.7';
+    batteryInput.style.borderColor = 'rgba(0,212,255,0.4)';
+    batteryInput.style.background  = 'rgba(0,212,255,0.04)';
+    lockHint.style.display = 'inline-block';
+    metaBlock.style.display = 'block';
+    metaModel.textContent   = model    || '—';
+    metaPort.textContent    = port     || '—';
+    metaBattery.textContent = batteryVal || '—';
+    applyChargeType(chargeVal || getChargeType(port));
+}
+
+function resetVehicle() {
+    batteryInput.readOnly          = false;
+    batteryInput.value             = '';
+    batteryInput.style.opacity     = '';
+    batteryInput.style.borderColor = '';
+    batteryInput.style.background  = '';
+    lockHint.style.display  = 'none';
+    metaBlock.style.display = 'none';
+    metaModel.textContent   = '—';
+    metaPort.textContent    = '—';
+    metaBattery.textContent = '—';
+    resetChargeType();
+}
+
+function onChange() {
+    const vid = vehicleSelect.value;
+    if (!vid) { resetVehicle(); return; }
+
+    const opt         = vehicleSelect.options[vehicleSelect.selectedIndex];
+    const dataBattery = opt.getAttribute('data-battery');
+    const dataPort    = opt.getAttribute('data-port');
+    const dataModel   = opt.getAttribute('data-model');
+    const dataCharge  = opt.getAttribute('data-charge');
+
+    if (dataBattery) {
+        applyVehicle(dataBattery, dataModel, dataPort, dataCharge);
+    }
+
+    fetch(`/api/vehicle/${vid}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            if (data && !data.error) {
+                const serverBattery = data.battery_capacity !== undefined
+                    ? Number(data.battery_capacity).toFixed(2)
+                    : dataBattery;
+                const serverPort    = data.charging_port_type || dataPort;
+                const serverCharge  = getChargeType(serverPort);
+                applyVehicle(serverBattery, data.model || dataModel, serverPort, serverCharge);
+            }
+        })
+        .catch(err => { console.debug('Vehicle API unavailable, using data-attributes.', err); });
+}
+
+vehicleSelect.addEventListener('change', onChange);
+
+if (vehicleSelect.value) onChange();
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+<style>
+    /* ── Predict Form Mobile Responsive ── */
+    @media (max-width: 768px) {
+        .form-footer { flex-wrap: wrap; }
+        .form-footer > div { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        #resumeSessionBtn, #themeToggle, #runPredictionBtn { flex: 1; min-width: 120px; font-size: 0.75rem; padding: 10px 12px; }
+    }
+
+    @media (max-width: 680px) {
+        .form-footer > div { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        #resumeSessionBtn, #themeToggle, #runPredictionBtn { width: 100%; font-size: 0.75rem; padding: 11px 14px; }
+        .calc-results { margin-top: 20px; }
+        .result-summary { padding: 14px; }
+        .result-summary h3 { font-size: 0.9rem; margin-bottom: 8px; }
+        .result-summary p { font-size: 0.85rem; margin: 6px 0; }
+        #suggestionCards { margin-top: 10px; }
+    }
+
+    @media (max-width: 480px) {
+        #resumeSessionBtn, #themeToggle, #runPredictionBtn { font-size: 0.7rem; padding: 10px 10px; }
+        .result-summary { padding: 12px; }
+        .result-summary h3 { font-size: 0.85rem; }
+        .result-summary p { font-size: 0.8rem; }
+    }
+
+    @media (max-width: 375px) {
+        #resumeSessionBtn, #themeToggle, #runPredictionBtn { font-size: 0.65rem; padding: 9px 8px; }
+        .result-summary { padding: 10px; }
+        .suggestion-card { font-size: 0.75rem; padding: 8px 10px; }
+    }
+</style>
+
+{% endblock %}

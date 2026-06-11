@@ -50,6 +50,51 @@
             pointer-events: none; z-index: 0;
         }
 
+        body.light-theme {
+            --bg: #f5f7fb;
+            --panel: #ffffff;
+            --border: #c6d5e9;
+            --accent: #0f5e8d;
+            --accent2: #1c7a9b;
+            --accent3: #3b7cdb;
+            --text: #102a42;
+            --muted: #617a90;
+            --glow: 0 0 10px rgba(28,122,155,0.2);
+        }
+
+        body.light-theme .navbar { background: rgba(255,255,255,0.94); border-bottom-color: rgba(100, 149, 237, 0.2); }
+        body.light-theme .form-panel { background: var(--panel); border-color: var(--border); }
+        body.light-theme .btn-submit { color: #0d1e35; }
+
+        body.dark-theme {
+            --bg: #050c12;
+            --panel: #0b1d2e;
+            --border: #0f4060;
+            --accent: #00d4ff;
+            --accent2: #00ff88;
+            --accent3: #7b4fff;
+            --text: #c8e8f5;
+            --muted: #4a7a99;
+            --glow: 0 0 24px rgba(0,212,255,0.3);
+        }
+
+        .suggestion-card {
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid rgba(0, 255, 136, 0.27);
+            color: var(--text);
+            animation: fadeInCard 0.4s ease forwards;
+        }
+
+        .fade-in { opacity: 0; animation: fadeInCard 0.4s ease forwards; }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* ── NAVBAR ── */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -65,12 +110,12 @@
             font-size: 0.9rem; font-weight: 700;
             color: var(--accent); letter-spacing: 0.06em;
             display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
         }
 
         .logo-dot {
             width: 8px; height: 8px; border-radius: 50%;
-            background: var(--accent2);
-            box-shadow: 0 0 10px var(--accent2);
+            background: var(--accent2); box-shadow: 0 0 10px var(--accent2);
             animation: pulse 2s infinite;
         }
 
@@ -89,7 +134,6 @@
             color: var(--muted); text-decoration: none;
             padding: 6px 14px; border-radius: 4px; transition: all 0.2s;
         }
-
         .nav-links-plain a:hover { color: var(--accent); }
 
         /* Mobile Hamburger Menu */
@@ -119,11 +163,11 @@
         /* Mobile Menu Toast */
         .mobile-menu-toast {
             position: fixed;
-            top: 68px;
+            top: 60px;
             right: -100%;
             width: 100%;
             max-width: 320px;
-            height: calc(100vh - 68px);
+            height: calc(100vh - 60px);
             background: var(--bg);
             border-left: 1px solid var(--border);
             box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
@@ -195,16 +239,32 @@
             opacity: 1;
             pointer-events: all;
         }
+
+        body.light-theme .mobile-menu-toast {
+            background: var(--bg);
+            border-left-color: var(--border);
+        }
+
+        body.light-theme .mobile-menu-item {
+            background: rgba(15, 94, 141, 0.08);
+            border-color: rgba(15, 94, 141, 0.15);
+            color: var(--text);
+        }
+
+        body.light-theme .mobile-menu-item:hover {
+            background: rgba(15, 94, 141, 0.15);
+            border-color: var(--accent);
+        }
+
+        .btn-login {
             font-family: 'DM Sans', sans-serif;
             font-size: 0.8rem; font-weight: 500;
             letter-spacing: 0.08em; text-transform: uppercase;
             text-decoration: none; color: var(--accent);
             padding: 9px 22px; border-radius: 6px;
             border: 1px solid rgba(0,212,255,0.35);
-            background: rgba(0,212,255,0.05);
-            transition: all 0.2s;
+            background: rgba(0,212,255,0.05); transition: all 0.2s;
         }
-
         .btn-login:hover { background: rgba(0,212,255,0.12); border-color: var(--accent); }
 
         .btn-register {
@@ -214,10 +274,8 @@
             text-decoration: none; color: #050c12;
             padding: 9px 22px; border-radius: 6px; border: none;
             background: var(--accent);
-            box-shadow: 0 0 20px rgba(0,212,255,0.35);
-            transition: all 0.2s;
+            box-shadow: 0 0 20px rgba(0,212,255,0.35); transition: all 0.2s;
         }
-
         .btn-register:hover {
             background: #33ddff;
             box-shadow: 0 0 32px rgba(0,212,255,0.55);
@@ -280,9 +338,8 @@
             text-decoration: none; color: #050c12;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
             padding: 15px 36px; border-radius: 8px; border: none;
-            box-shadow: 0 0 30px rgba(0,212,255,0.4); transition: all 0.25s;
+            box-shadow: 0 0 30px rgba(0,212,255,0.4); transition: all 0.25s; cursor: pointer;
         }
-
         .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(0,212,255,0.55); }
 
         .cta-secondary {
@@ -294,7 +351,6 @@
             background: transparent; padding: 15px 36px; border-radius: 8px;
             border: 1px solid rgba(0,212,255,0.3); transition: all 0.25s;
         }
-
         .cta-secondary:hover { background: rgba(0,212,255,0.07); border-color: var(--accent); transform: translateY(-2px); }
 
         .stats-bar {
@@ -312,7 +368,6 @@
             font-family: 'Orbitron', monospace;
             font-size: 1.5rem; font-weight: 700; color: var(--accent);
         }
-
         .stat-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 5px; }
 
         @keyframes fadeUp {
@@ -326,12 +381,7 @@
             max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;
         }
 
-        /* ── FEATURES ── */
-        .features {
-            position: relative; z-index: 1;
-            padding: 100px 52px; max-width: 1100px; margin: 0 auto;
-        }
-
+        /* ── SHARED SECTION STYLES ── */
         .section-eyebrow {
             font-size: 0.68rem; font-weight: 500;
             letter-spacing: 0.18em; text-transform: uppercase;
@@ -342,6 +392,138 @@
             font-family: 'Orbitron', monospace;
             font-size: clamp(1.5rem, 3vw, 2.2rem);
             font-weight: 700; color: #fff; margin-bottom: 56px;
+        }
+
+        /* ── PREDICTION FORM ── */
+        .prediction-section {
+            position: relative; z-index: 1;
+            padding: 100px 52px; max-width: 1000px; margin: 0 auto;
+        }
+
+        .form-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            position: relative;
+        }
+
+        /* top accent line */
+        .form-panel::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        }
+
+        .form-header {
+            padding: 32px 40px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .form-header-left h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.05rem; font-weight: 700; color: #fff;
+        }
+        .form-header-left p { font-size: 0.84rem; color: var(--muted); margin-top: 4px; }
+
+        .form-status {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--accent2);
+            background: rgba(0,255,136,0.07);
+            border: 1px solid rgba(0,255,136,0.2);
+            padding: 6px 14px; border-radius: 999px;
+        }
+
+        .form-status::before {
+            content: '';
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent2); box-shadow: 0 0 8px var(--accent2);
+            animation: pulse 2s infinite;
+        }
+
+        .form-body {
+            padding: 36px 40px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-size: 0.7rem; font-weight: 500;
+            letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap i {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.82rem; color: var(--muted); pointer-events: none;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px 12px 38px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            outline: none; transition: all 0.2s;
+            appearance: none; -webkit-appearance: none;
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a7a99' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-color: rgba(255,255,255,0.03);
+            padding-right: 36px;
+        }
+
+        .form-group select option { background: #0b1d2e; color: var(--text); }
+
+        .form-group input::placeholder { color: #1e4060; }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            background: rgba(0,212,255,0.04);
+            box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+        }
+
+        .form-footer {
+            padding: 22px 40px 32px;
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+
+        .form-note {
+            font-size: 0.78rem; color: var(--muted);
+            display: flex; align-items: center; gap: 7px;
+        }
+
+        .btn-submit {
+            display: inline-flex; align-items: center; gap: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: #050c12;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            padding: 13px 36px; border-radius: 8px; border: none;
+            cursor: pointer;
+            box-shadow: 0 0 28px rgba(0,212,255,0.35); transition: all 0.25s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(0,212,255,0.55); }
+
+        /* ── FEATURES ── */
+        .features {
+            position: relative; z-index: 1;
+            padding: 100px 52px; max-width: 1100px; margin: 0 auto;
         }
 
         .feature-grid {
@@ -362,7 +544,6 @@
             background: linear-gradient(90deg, transparent, var(--accent), transparent);
             opacity: 0; transition: opacity 0.3s;
         }
-
         .fcard:nth-child(2)::after { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
         .fcard:nth-child(3)::after { background: linear-gradient(90deg, transparent, var(--accent3), transparent); }
 
@@ -384,7 +565,6 @@
             font-size: 0.88rem; font-weight: 600;
             letter-spacing: 0.05em; color: #fff; margin-bottom: 12px;
         }
-
         .fcard p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
 
         /* ── HOW IT WORKS ── */
@@ -414,7 +594,6 @@
             font-size: 0.82rem; font-weight: 600;
             color: #fff; margin-bottom: 10px; letter-spacing: 0.05em;
         }
-
         .step p { font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
 
         /* ── CONTACT ── */
@@ -435,7 +614,6 @@
             text-decoration: none;
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
-
         .ccard:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.35), var(--glow); border-color: rgba(0,212,255,0.3); }
 
         .ccard-icon {
@@ -452,13 +630,13 @@
         .ccard-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
         .ccard-value { font-size: 0.86rem; color: var(--accent); }
 
+        /* ── FOOTER ── */
         footer {
             position: relative; z-index: 1;
             border-top: 1px solid var(--border);
             text-align: center; padding: 28px;
             font-size: 0.76rem; color: var(--muted); letter-spacing: 0.05em;
         }
-
         footer span { color: var(--accent2); }
 
         /* ── RESPONSIVE TABLETS: 768px ── */
@@ -479,12 +657,18 @@
             .stat-value { font-size: 1.2rem; }
             .stat-label { font-size: 0.62rem; }
             
-            .features, .how-section, .contact-section { padding: 70px 24px; }
+            .features, .how-section, .contact-section, .prediction-section { padding: 70px 24px; }
             .section-heading { font-size: clamp(1.3rem, 2.5vw, 2rem); margin-bottom: 40px; }
             .feature-grid { gap: 14px; }
             .fcard { padding: 28px 20px; }
             .fcard h3 { font-size: 0.8rem; margin-bottom: 10px; }
             .fcard p { font-size: 0.85rem; }
+            
+            .form-body { grid-template-columns: 1fr; gap: 16px; padding: 28px; }
+            .form-header { padding: 24px 28px 20px; }
+            .form-footer { padding: 16px 28px 24px; flex-direction: column; gap: 12px; }
+            .btn-submit { width: 100%; justify-content: center; font-size: 0.8rem; }
+            .form-note { font-size: 0.75rem; }
             
             .steps { grid-template-columns: 1fr; }
             .step { border-right: none; border-bottom: 1px solid var(--border); padding: 32px 24px; }
@@ -518,7 +702,7 @@
             .stat-value { font-size: 1.1rem; }
             .stat-label { font-size: 0.6rem; }
             
-            .features, .how-section, .contact-section { padding: 50px 16px; }
+            .features, .how-section, .contact-section, .prediction-section { padding: 50px 16px; }
             .section-eyebrow { font-size: 0.62rem; margin-bottom: 10px; }
             .section-heading { font-size: clamp(1.2rem, 4vw, 1.8rem); margin-bottom: 32px; }
             .feature-grid { gap: 12px; }
@@ -526,6 +710,19 @@
             .fcard-icon { width: 42px; height: 42px; font-size: 1.15rem; margin-bottom: 16px; }
             .fcard h3 { font-size: 0.78rem; margin-bottom: 8px; }
             .fcard p { font-size: 0.83rem; line-height: 1.5; }
+            
+            .form-panel { border-radius: 12px; }
+            .form-header { padding: 20px 16px 16px; flex-direction: column; align-items: flex-start; }
+            .form-header-left h2 { font-size: 0.95rem; }
+            .form-header-left p { font-size: 0.78rem; }
+            .form-status { font-size: 0.62rem; padding: 5px 12px; }
+            .form-body { grid-template-columns: 1fr; gap: 14px; padding: 20px 16px; }
+            .form-group label { font-size: 0.65rem; }
+            .form-group input, .form-group select { font-size: 0.9rem; padding: 10px 12px 10px 34px; border-radius: 6px; }
+            .input-wrap i { font-size: 0.75rem; left: 11px; }
+            .form-footer { padding: 14px 16px 20px; flex-direction: column; gap: 10px; }
+            .form-note { font-size: 0.72rem; }
+            .btn-submit { width: 100%; font-size: 0.77rem; padding: 10px 20px; }
             
             .steps { grid-template-columns: 1fr; gap: 0; }
             .step { border-right: none; border-bottom: 1px solid var(--border); padding: 28px 16px; }
@@ -560,13 +757,22 @@
             .stat-value { font-size: 1rem; }
             .stat-label { font-size: 0.55rem; }
             
-            .features, .how-section, .contact-section { padding: 40px 14px; }
+            .features, .how-section, .contact-section, .prediction-section { padding: 40px 14px; }
             .section-heading { font-size: clamp(1rem, 3.5vw, 1.6rem); margin-bottom: 28px; }
             .feature-grid { gap: 10px; }
             .fcard { padding: 20px 14px; }
             .fcard-icon { width: 38px; height: 38px; font-size: 1rem; margin-bottom: 14px; }
             .fcard h3 { font-size: 0.75rem; }
             .fcard p { font-size: 0.8rem; }
+            
+            .form-header { padding: 18px 14px 14px; }
+            .form-header-left h2 { font-size: 0.9rem; }
+            .form-body { padding: 16px 14px; gap: 12px; }
+            .form-group label { font-size: 0.62rem; }
+            .form-group input, .form-group select { font-size: 0.85rem; padding: 9px 10px 9px 32px; }
+            .input-wrap i { font-size: 0.7rem; left: 10px; }
+            .form-footer { padding: 12px 14px 18px; gap: 8px; }
+            .btn-submit { font-size: 0.75rem; padding: 9px 16px; }
             
             .step { padding: 24px 14px; }
             .step-num { font-size: 1.8rem; }
@@ -590,29 +796,42 @@
             .hero-badge { font-size: 0.55rem; padding: 4px 10px; }
             .cta-primary, .cta-secondary { font-size: 0.7rem; padding: 9px 16px; }
             
-            .features, .how-section, .contact-section { padding: 35px 12px; }
+            .features, .how-section, .contact-section, .prediction-section { padding: 35px 12px; }
             .section-heading { font-size: clamp(1rem, 3vw, 1.4rem); margin-bottom: 24px; }
             .fcard { padding: 18px 12px; }
             .fcard h3 { font-size: 0.72rem; }
             .fcard p { font-size: 0.78rem; }
             
+            .form-header { padding: 16px 12px 12px; }
+            .form-header-left h2 { font-size: 0.85rem; }
+            .form-body { padding: 14px 12px; gap: 10px; }
+            .form-group label { font-size: 0.6rem; }
+            .form-group input, .form-group select { font-size: 0.8rem; padding: 8px 8px 8px 30px; }
+            .input-wrap i { font-size: 0.65rem; left: 9px; }
+            .btn-submit { font-size: 0.7rem; padding: 8px 14px; }
+            
             .step { padding: 20px 12px; }
             .ccard { padding: 16px 10px; }
         }
+    </style>
     </style>
 </head>
 <body>
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo">
+        <a href="{{ url_for('postlogin') }}" class="logo">
             <div class="logo-dot"></div>
             SmartCharge Pro
         </a>
         <div class="nav-right">
             <ul class="nav-links-plain">
                 <li><a href="#features-section">Features</a></li>
-                <li><a href="#how-section">How It Works</a></li>
+                <li><a href="{{ url_for('how') }}">How It Works</a></li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('predict') }}">Prediction</a></li>
+                <li><a href="{{ url_for('vehicles') }}">My Vehicles</a></li>
+                {% endif %}
                 <li><a href="#contact-section">Contact</a></li>
             </ul>
             {% if current_user.is_authenticated %}
@@ -634,12 +853,23 @@
     <!-- Mobile Menu Toast -->
     <div class="mobile-menu-overlay" id="menuOverlay"></div>
     <div class="mobile-menu-toast" id="mobileMenu">
+        <a href="{{ url_for('postlogin') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-home"></i> Home
+        </a>
         <a href="#features-section" class="mobile-menu-item" onclick="closeMobileMenu()">
             <i class="fas fa-star"></i> Features
         </a>
         <a href="{{ url_for('how') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
             <i class="fas fa-book"></i> How It Works
         </a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('predict') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-bolt"></i> Prediction
+        </a>
+        <a href="{{ url_for('vehicles') }}" class="mobile-menu-item" onclick="closeMobileMenu()">
+            <i class="fas fa-car"></i> My Vehicles
+        </a>
+        {% endif %}
         <a href="#contact-section" class="mobile-menu-item" onclick="closeMobileMenu()">
             <i class="fas fa-phone"></i> Contact
         </a>
@@ -662,6 +892,8 @@
         </div>
     </div>
 
+    {% block content %}
+
     <!-- HERO -->
     <section class="hero">
         <div class="hero-badge">
@@ -674,9 +906,15 @@
             Powered by machine learning, calibrated for real-world conditions.
         </p>
         <div class="hero-cta">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('predict') }}" class="cta-primary">
+                <i class="fas fa-bolt"></i> Run Prediction
+            </a>
+            {% else %}
             <a href="{{ url_for('register') }}" class="cta-primary">
                 <i class="fas fa-bolt"></i> Get Started Free
             </a>
+            {% endif %}
             <a href="#features-section" class="cta-secondary">
                 <i class="fas fa-layer-group"></i> Learn More
             </a>
@@ -728,43 +966,22 @@
 
     <hr class="divider">
 
-    <!-- HOW IT WORKS -->
-    <section id="how-section" class="how-section">
-        <div class="section-eyebrow">Process</div>
-        <div class="section-heading">How It Works</div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num">01</div>
-                <h4>Create Account</h4>
-                <p>Sign up for free and get instant access to the prediction engine and your personal dashboard.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">02</div>
-                <h4>Enter Details</h4>
-                <p>Input your battery capacity, current charge level, charger power, and ambient temperature.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">03</div>
-                <h4>Get Prediction</h4>
-                <p>Our ML model instantly returns an accurate charge time estimate tailored to your session.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">04</div>
-                <h4>Optimize</h4>
-                <p>Follow smart recommendations to reduce charging time and extend your battery's lifespan.</p>
-            </div>
-        </div>
+    <hr class="divider">
+    <section class="how-promo" style="padding:40px 52px; text-align:center;">
+        <h3 class="section-heading">How It Works</h3>
+        <p style="color:var(--muted); max-width:800px; margin:0 auto 18px;">Learn how SmartCharge Pro predicts charging time and provides optimization suggestions tailored to your vehicle.</p>
+        <a href="{{ url_for('how') }}" class="cta-primary">Read the full process</a>
     </section>
-
     <hr class="divider">
 
+    <!-- Prediction form moved to its own page (/predict) -->
+
     <!-- CONTACT -->
-    <section id="contact-section" class="contact-section">
-        
-        </div>
-    </section>
+    
 
     <!-- FOOTER -->
+    {% endblock %}
+
     <footer>
         <p>&copy; 2025 <span>SmartCharge Pro</span> — All Rights Reserved.</p>
     </footer>

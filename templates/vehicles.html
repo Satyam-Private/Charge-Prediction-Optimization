@@ -1,0 +1,88 @@
+{% extends "postlogin.html" %}
+
+{% block content %}
+<style>
+    .vehicles-table-wrapper { overflow-x: auto; }
+    
+    @media (max-width: 768px) {
+        .vehicles-table-wrapper table th, .vehicles-table-wrapper table td { padding: 10px 6px; font-size: 0.85rem; }
+        .vehicles-table-wrapper table th { font-size: 0.75rem; }
+    }
+    
+    @media (max-width: 680px) {
+        .vehicles-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .vehicles-table-wrapper table { font-size: 0.75rem; }
+        .vehicles-table-wrapper table th, .vehicles-table-wrapper table td { padding: 8px 4px; }
+        .vehicles-table-wrapper with { min-width: 600px; display: block; }
+        .cta-secondary { font-size: 0.7rem; padding: 6px 10px; }
+        .btn-submit { font-size: 0.7rem; padding: 6px 10px; }
+    }
+    
+    @media (max-width: 480px) {
+        .form-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .form-header-left h2 { font-size: 0.95rem; }
+        .cta-primary { font-size: 0.73rem; padding: 9px 16px; width: 100%; justify-content: center; }
+        .vehicles-table-wrapper table { font-size: 0.7rem; min-width: 550px; }
+        .vehicles-table-wrapper table th, .vehicles-table-wrapper table td { padding: 6px 3px; }
+        .cta-secondary { font-size: 0.65rem; padding: 5px 8px; }
+        .btn-submit { font-size: 0.65rem; padding: 5px 8px; }
+    }
+    
+    @media (max-width: 375px) {
+        .form-header-left h2 { font-size: 0.88rem; }
+        .form-header-left p { font-size: 0.72rem; }
+        .vehicles-table-wrapper table { font-size: 0.65rem; min-width: 480px; }
+        .vehicles-table-wrapper table th, .vehicles-table-wrapper table td { padding: 5px 2px; }
+    }
+</style>
+
+<section class="prediction-section">
+    <div class="form-panel">
+        <div class="form-header">
+            <div class="form-header-left">
+                <h2>My Vehicles</h2>
+                <p class="form-sub">Manage your vehicles — add, edit or delete.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('add_vehicle') }}" class="cta-primary">Add Vehicle</a>
+            </div>
+        </div>
+
+        <div class="form-body" style="grid-template-columns: 1fr;">
+            {% if vehicles %}
+                <div class="vehicles-table-wrapper">
+                    <table style="width:100%; border-collapse: collapse; color: #c8e8f5;">
+                        <thead>
+                            <tr style="text-align:left; border-bottom:1px solid rgba(74,122,153,0.12);">
+                                <th>Name</th>
+                                <th>Model</th>
+                                <th>Battery (kWh)</th>
+                                <th>Port</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in vehicles %}
+                            <tr style="border-bottom:1px solid rgba(74,122,153,0.06);">
+                                <td>{{ v.name or '—' }}</td>
+                                <td>{{ v.model }}</td>
+                                <td>{{ '%.2f'|format(v.battery_capacity) }}</td>
+                                <td>{{ v.charging_port_type }}</td>
+                                <td>
+                                    <a href="{{ url_for('edit_vehicle', vid=v.id) }}" class="cta-secondary">Edit</a>
+                                    <form method="POST" action="{{ url_for('delete_vehicle', vid=v.id) }}" style="display:inline; margin-left:8px;">
+                                        <button class="btn-submit" style="background:#ff6b6b; box-shadow:none;" onclick="return confirm('Delete this vehicle?')">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="padding:32px; color:var(--muted);">No vehicles yet. Click "Add Vehicle" to create one.</div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

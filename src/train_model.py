@@ -5,7 +5,7 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, r2_score
 
 # Load preprocessed data
-df = pd.read_csv("D:\Ev Charging Time Prediction\dataset\preprocessed_data.csv")
+df = pd.read_csv("D:\Smart_charging_timePrediction_Optimization\SmartCharge-Pro-Smart-EV-Charging-Prediction-Optimization\dataset\preprocessed_data.csv")
 
 # Splitting dataset
 X = df.drop(columns=['charging_time_minutes'])
@@ -18,8 +18,11 @@ model.fit(X_train, y_train)
 
 # Evaluate
 y_pred = model.predict(X_test)
-print(f"MAE: {mean_absolute_error(y_test, y_pred):.2f}, R2 Score: {r2_score(y_test, y_pred):.2f}")
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+accuracy = r2 * 100
+print(f"MAE: {mae:.2f}, R2 Score: {r2:.2f}, Accuracy: {accuracy:.2f}%")
 
 # Save model
-with open("D:\Ev Charging Time Prediction\models\ev_charging_model.pkl", "wb") as f:
+with open("D:\Smart_charging_timePrediction_Optimization\SmartCharge-Pro-Smart-EV-Charging-Prediction-Optimization\models\ev_charging_model.pkl", "wb") as f:
     pickle.dump(model, f)
